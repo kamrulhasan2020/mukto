@@ -1,0 +1,23 @@
+{% extends 'main/base.html' %}
+
+{% load crispy_forms_tags % }
+
+{% block title %}
+<title>Start A New Thread</title>
+{% endblock %}
+
+{% block body%}
+
+<div class="container p-5 my-5 text-black bg-light">
+  <center>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <table border="1">
+    {{ form }}
+  </table>
+    <br>
+    <button type="submit" class="btn btn-outline-primary">Post</button>
+  </form>
+  </center>
+</div>
+{% endblock %}

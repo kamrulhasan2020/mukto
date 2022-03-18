@@ -1,0 +1,70 @@
+{% extends 'main/base.html' %}
+{% load humanize %}
+{% block title %}
+<title>{{board.name}}</title>
+{% endblock %}
+
+{% block body%}
+
+<div class="container p-5 my-5 text-black">
+  <center>
+    <img class="img-fluid" src="{{board.banner.url}}" height="500px" width="300px">
+    <br>
+    <h4 style="color:crimson">board/{{board.name}}</h4>
+    <br>
+  <a href="{% url 'main:create_post' board=board.name %}">
+  <button class="btn btn-outline-primary">Start A New Thread</button>
+  </a>
+  </center>
+  <br>
+  <div class="row" align="center">
+  {% for post in Posts %}
+    <div class="col-sm-3 p-3 bg-light text-black">
+      <img class="card-img-top" src="{{post.image.url}}" alt="Card image" height="200" width="200">
+        {% if post.name %}
+          <p class="card-title">Posted By: {{post.name}}</p>
+        {% endif %}
+        <p class="card-text">{{post.comments__count}} Comments</p>
+        <p class="card-text">{{post.created|naturaltime}}</p>
+        <h4 class="card-title">{{post.title}}</h4>
+        <p class="card-text">{{post.body}}</p>
+        <a  href="{{post.get_absolute_url}}" class="btn btn-primary">View</a>
+    </div>
+  {% endfor %}
+  </div>
+
+    <br><br>
+
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+<p>{{board.board_name}}</p>
+{% for post in Posts %}
+    <p>{{post.title}}</p>
+{% endfor %}

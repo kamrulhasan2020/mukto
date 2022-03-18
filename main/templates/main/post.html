@@ -1,0 +1,119 @@
+
+{% extends 'main/base.html' %}
+{% load humanize %}
+
+{% block title %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<style>
+div.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  float:right;
+  background-color: ivory;
+  padding: 5px;
+  font-size: 15px;
+}
+</style>
+<title>{{Post.title}}</title>
+{% endblock %}
+
+{% block body%}
+<div class="container p-5 my-5 bg-light">
+  <ul class="list-group">
+    <li class="list-group-item list-group-item-success" >
+    <img src="{{Post.image.url}}" class="img-thumbnail"><br>
+    <p class="post-no" id="{{Post.no}}" style="color:blue"><u>No.{{Post.no}}</u></p>
+    {% if Post.name %}
+        <p style="color:tomato">Created By: {{Post.name}}</p>
+    {% endif %}
+    <p style="color:crimson">{{Post.created|naturaltime}}</p>
+    <h4 style="color:slateblue">{{Post.title}}</h4>
+    <p style="color:green">{{Post.body}}</p>
+    </li>
+  </ul>
+</div>
+
+<div class="sticky" style="display:none" id="form-holder">
+    <form method="post" class="ajax" enctype="multipart/form-data" id="comment_up_form">
+        {% csrf_token %}
+        <p>Add A Comment</p>
+        <p id="replying_to"></p>
+        <label for="image" class="form-label">Image</label>
+        <input type="file" class="form-control" name="image" id="image">
+        <br>
+        <label for="comment" class="form-label">comment</label><br>
+        <textarea class="form-control" rows="5" id="comment" name="body"></textarea>
+        <input type="hidden" id="no" name="parent"><br>
+        <button type="submit" class="btn btn-outline-primary" id="comment_submit">Post</button>
+    </form>
+</div>
+
+
+<div class="container p-5 my-5">
+    <br>
+    <ul class="list-group" id="comment_list">
+    {% for comment in Comments %}
+        <li class="list-group-item list-group-item-success" >
+            {% if comment.image %}
+                <img src="{{comment.image.url}}">
+            {% endif %}
+            {% if comment.parent %}
+                <p style="color:crimson">Replying to:{{comment.parent.no}}</p>
+            {% endif %}
+            <p class="comment-no" id="{{comment.no}}" style="color:blue"><u>No.{{comment.no}}</u></p>
+            <p>{{comment.body}}</p>
+        </li>
+        <br>
+    {% endfor %}
+    </ul>
+    <script>
+        $(document).ready(function(){
+        $(".comment-no").click(function(){
+            let id = ($(this).attr('id'));
+            $("#form-holder").attr("style", "display:block");
+            $("#no").val(id);
+            $("#replying_to").text("Replying to: "+id);
+        });
+        $(".post-no").click(function(){
+            $("#form-holder").attr("style", "display:block");
+            $("#replying_to").text("");
+        });
+
+  $("#comment_up_form").submit(function (e) {
+    e.preventDefault();
+    $.ajax({
+      type: "POST",
+      enctype: 'multipart/form-data',
+      url: "{% url 'api:comments' board=Post.board.name no=Post.no %}",
+      headers: {'X-CSRFToken': '{{ csrf_token }}', 'Accept':'application/json'},
+      contentType: false,
+      processData: false,
+      data: new FormData($('#comment_up_form')[0]),
+      success: function () {
+        $.get("{% url 'api:latest_comment' board=Post.board.name no=Post.no %}", function(data, status){
+          $("#form-holder").attr("style", "display:none");
+          if(data.image && data.parent)
+          {
+            $("#comment_list").append("<li class='list-group-item list-group-item-success'><img src="+ data.image+ ">"+"<p style='color:crimson'>"+'Replying to: '+data.parent+"</p>"+"<p class='comment_no'>"+ "No."+data.no+"</p>" + "<p>" +data.body+"</p>" +"</li>");
+          }
+          else if(data.image){
+          $("#comment_list").append("<li class='list-group-item list-group-item-success'><img src="+ data.image+ ">"+"<p class='comment_no'>" + "No."+data.no+"</p>" + "<p>" + data.body+ "</p>" + "</li>");
+          }
+          else if(data.parent){
+          $("#comment_list").append("<li class='list-group-item list-group-item-success'><p style='color:crimson'>" +'Replying to:'+ data.parent +"</p>"+ "<p class='comment_no'>"+ "No." + data.no+ "</p>" +"<p>" + data.body +"</p>" + "</li>");
+          }
+          else{
+          $("#comment_list").append("<li class='list-group-item list-group-item-success'>" + "<p class='comment_no'>"+ "No." + data.no+ "<p>" + data.body +"</p>" + "</li>");
+          }
+          $('html, body').animate({scrollTop:$(document).height()}, 'slow');
+        });
+      }
+    });
+    return false;
+  });
+});
+</script>
+</div>
+
+{% endblock%}
