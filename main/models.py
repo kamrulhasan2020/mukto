@@ -30,7 +30,7 @@ class Board(models.Model):
 
 class Post(models.Model):
     name = models.CharField(max_length=30, blank=True)
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=50)
     body = models.TextField()
     image = models.ImageField(upload_to="post_images")
     no = models.SlugField(max_length=10, unique=True, blank=True)
