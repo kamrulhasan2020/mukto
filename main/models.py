@@ -53,8 +53,8 @@ class Post(models.Model):
             self.no = get_unique_id(self.board)
         super().save(*args, **kwargs)
         img = Image.open(self.image.path)
-        if img.height > 500 or img.width > 600:
-            out_size = (500, 600)
+        if img.height > 600 or img.width > 600:
+            out_size = (600, 600)
             img.thumbnail(out_size)
             img.save(self.image.path)
 

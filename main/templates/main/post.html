@@ -14,32 +14,43 @@ div.sticky {
   padding: 5px;
   font-size: 15px;
 }
+
+.comment-parent {
+  color: crimson;
+}
+
+.comment-no {
+  color: blue;
+}
+
+.comment-body {
+  color: PaleGreen;
+}
 </style>
 <title>{{Post.title}}</title>
 {% endblock %}
 
 {% block body%}
-<div class="container p-5 my-5 bg-light">
-  <ul class="list-group">
-    <li class="list-group-item list-group-item-success" >
-    <img src="{{Post.image.url}}" class="img-thumbnail"><br>
+<div class="container p-5 my-5 bg-dark">
+    <center>
+    <img src="{{Post.image.url}}" class="img-thumbnail" height='300' width='500'><br>
     <p class="post-no" id="{{Post.no}}" style="color:blue"><u>No.{{Post.no}}</u></p>
     {% if Post.name %}
         <p style="color:tomato">Created By: {{Post.name}}</p>
     {% endif %}
     <p style="color:crimson">{{Post.created|naturaltime}}</p>
     <h4 style="color:slateblue">{{Post.title}}</h4>
-    <p style="color:green">{{Post.body}}</p>
-    </li>
-  </ul>
+    <p style="color:PaleGreen">{{Post.body}}</p>
+    </center>
 </div>
 
-<div class="sticky" style="display:none" id="form-holder">
+<div class="container sticky-top bg-dark text-white" style="display:none; width:30%;" id="form-holder">
+  <center>
     <form method="post" class="ajax" enctype="multipart/form-data" id="comment_up_form">
         {% csrf_token %}
         <p>Add A Comment</p>
         <p id="replying_to"></p>
-        <label for="image" class="form-label">Image</label>
+        <label for="image" class="form-label" required='false'>Image[optional]</label>
         <input type="file" class="form-control" name="image" id="image">
         <br>
         <label for="comment" class="form-label">comment</label><br>
@@ -47,6 +58,10 @@ div.sticky {
         <input type="hidden" id="no" name="parent"><br>
         <button type="submit" class="btn btn-outline-primary" id="comment_submit">Post</button>
     </form>
+    <br>
+    <button class="btn btn-outline-danger" id='cancel_button'>Cancel</button>
+    <br>
+  </center>
 </div>
 
 
@@ -54,15 +69,17 @@ div.sticky {
     <br>
     <ul class="list-group" id="comment_list">
     {% for comment in Comments %}
-        <li class="list-group-item list-group-item-success" >
+        <li class="list-group-item bg-dark" >
+            <center>
             {% if comment.image %}
-                <img src="{{comment.image.url}}">
+                <img src="{{comment.image.url}}" class="img-fluid" height='300' width='500'>
             {% endif %}
             {% if comment.parent %}
-                <p style="color:crimson">Replying to:{{comment.parent.no}}</p>
+                <p class='comment-parent'>Replying to:{{comment.parent.no}}</p>
             {% endif %}
-            <p class="comment-no" id="{{comment.no}}" style="color:blue"><u>No.{{comment.no}}</u></p>
-            <p>{{comment.body}}</p>
+            <p class="comment-no" id="{{comment.no}}"><u>No.{{comment.no}}</u></p>
+            <p class='comment-body'>{{comment.body}}</p>
+            <center>
         </li>
         <br>
     {% endfor %}
@@ -80,6 +97,10 @@ div.sticky {
             $("#replying_to").text("");
         });
 
+        $("#cancel_button").click(function(){
+          $("#form-holder").attr("style", "display:none");
+      });
+
   $("#comment_up_form").submit(function (e) {
     e.preventDefault();
     $.ajax({
@@ -95,16 +116,16 @@ div.sticky {
           $("#form-holder").attr("style", "display:none");
           if(data.image && data.parent)
           {
-            $("#comment_list").append("<li class='list-group-item list-group-item-success'><img src="+ data.image+ ">"+"<p style='color:crimson'>"+'Replying to: '+data.parent+"</p>"+"<p class='comment_no'>"+ "No."+data.no+"</p>" + "<p>" +data.body+"</p>" +"</li>");
+            $("#comment_list").append("<li class='list-group-item bg-dark' align='center'><img class='img-fluid' src="+ data.image+ ">"+"<p class='comment-parent'>"+'Replying to: '+data.parent+"</p>"+"<p class='comment-no'>"+ "No."+data.no+"</p>" + "<p class='comment-body'>" +data.body+"</p>" +"</li>");
           }
           else if(data.image){
-          $("#comment_list").append("<li class='list-group-item list-group-item-success'><img src="+ data.image+ ">"+"<p class='comment_no'>" + "No."+data.no+"</p>" + "<p>" + data.body+ "</p>" + "</li>");
+          $("#comment_list").append("<li class='list-group-item bg-dark' align='center'><img class='img-fluid' src="+ data.image+ ">"+"<p class='comment-no'>" + "No."+data.no+"</p>" + "<p class='comment-body'>" + data.body+ "</p>" + "</li>");
           }
           else if(data.parent){
-          $("#comment_list").append("<li class='list-group-item list-group-item-success'><p style='color:crimson'>" +'Replying to:'+ data.parent +"</p>"+ "<p class='comment_no'>"+ "No." + data.no+ "</p>" +"<p>" + data.body +"</p>" + "</li>");
+          $("#comment_list").append("<li class='list-group-item bg-dark' align='center'><p class='comment-parent'>" +'Replying to:'+ data.parent +"</p>"+ "<p class='comment-no'>"+ "No." + data.no+ "</p>" +"<p class='comment-body'>" + data.body +"</p>" + "</li>");
           }
           else{
-          $("#comment_list").append("<li class='list-group-item list-group-item-success'>" + "<p class='comment_no'>"+ "No." + data.no+ "<p>" + data.body +"</p>" + "</li>");
+          $("#comment_list").append("<li class='list-group-item bg-dark' align='center'>" + "<p class='comment-no'>"+ "No." + data.no+ "<p class='comment-body'>" + data.body +"</p>" + "</li>");
           }
           $('html, body').animate({scrollTop:$(document).height()}, 'slow');
         });

@@ -8,12 +8,12 @@
 
 {% block body%}
 
-<div class="container p-5 my-5 text-black bg-light">
+<div class="container p-5 my-5 text-white bg-dark">
   <center>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <table border="1">
-    {{ form }}
+    {{ form}}
   </table>
     <br>
     <button type="submit" class="btn btn-outline-primary">Post</button>
